@@ -10,6 +10,7 @@ import ThemeToggle from "./components/ThemeToggle"
 import ParticleBackground from "./components/ParticleBackground.jsx"
 import "bootstrap/dist/css/bootstrap.min.css"
 import "./App.css"
+import "./utils/scrollAnimations.js"
 
 export default function App() {
   return (

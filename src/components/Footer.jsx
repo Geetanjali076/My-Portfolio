@@ -5,23 +5,29 @@ export default function Footer() {
   const fullText = "I will give my best forever in my career and my life."
 
   useEffect(() => {
-  let i = 0
-  let timer
-  function typeWriter() {
-    if (i < fullText.length) {
-      setText(prev => prev + fullText.charAt(i))
-      i++
-      timer = setTimeout(typeWriter, 50)
+    // Reset text when component mounts
+    setText("")
+    let i = 0
+    let timer
+    
+    function typeWriter() {
+      if (i < fullText.length) {
+        setText(fullText.substring(0, i + 1)) // Use substring instead of concatenation
+        i++
+        timer = setTimeout(typeWriter, 100) // Slower speed for better visibility
+      } else {
+        // Mark as done when typing is complete
+        document.getElementById('footerText')?.classList.add('done')
+      }
     }
-  }
-  typeWriter()
-  return () => clearTimeout(timer) // clean up timer
-}, [])
-
+    
+    typeWriter()
+    return () => clearTimeout(timer) // clean up timer
+  }, []) // Empty dependency array ensures this runs only once
 
   return (
     <footer>
-      <span id="footerText" className="done">{text}</span>
+      <span id="footerText">{text}</span>
     </footer>
   )
 }
