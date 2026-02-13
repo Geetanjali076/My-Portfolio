@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 
-export default function Navbar() {
+export default function Navbar({ activeSection, onSectionChange }) {
   const [open, setOpen] = useState(false)
   const isRestoringRef = useRef(false)
   const modalOpenRef = useRef(false)
@@ -11,7 +11,36 @@ export default function Navbar() {
     const validSections = ['home', 'work', 'skills', 'about', 'contact']
     return validSections.includes(hash) ? hash : "home"
   }
-  const [activeSection, setActiveSection] = useState(getInitialSection())
+  const [activeSectionState, setActiveSectionState] = useState(getInitialSection())
+  
+  // Use props for active section if provided, otherwise use internal state
+  const currentActiveSection = activeSection || activeSectionState
+  
+  // Force update active section when URL hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '')
+      const validSections = ['home', 'work', 'skills', 'about', 'contact']
+      
+      if (validSections.includes(hash)) {
+        if (onSectionChange) {
+          onSectionChange(hash)
+        } else {
+          setActiveSectionState(hash)
+        }
+      }
+    }
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+    
+    // Also check on initial load
+    handleHashChange()
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
 
   useEffect(() => {
     let scrollTimeout
@@ -36,7 +65,11 @@ export default function Navbar() {
           const id = section.getAttribute('id')
 
           if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(id)
+            if (onSectionChange) {
+              onSectionChange(id)
+            } else {
+              setActiveSectionState(id)
+            }
           }
         })
       }, 50) // 50ms debounce
@@ -66,14 +99,23 @@ export default function Navbar() {
           }
         })
         
-        // Store the current section
+        // Store the current section AND force update active section immediately
         document.body.setAttribute('data-modal-section', currentSection)
+        if (onSectionChange) {
+          onSectionChange(currentSection)
+        } else {
+          setActiveSectionState(currentSection)
+        }
       } else {
         // Modal is closing - restore the section
         const savedSection = document.body.getAttribute('data-modal-section')
         if (savedSection) {
           isRestoringRef.current = true
-          setActiveSection(savedSection)
+          if (onSectionChange) {
+            onSectionChange(savedSection)
+          } else {
+            setActiveSectionState(savedSection)
+          }
           
           // Update URL hash to match the restored section
           if (savedSection !== 'home') {
@@ -130,6 +172,13 @@ export default function Navbar() {
     // Update URL hash
     window.history.replaceState(null, null, `#${sectionId}`)
     
+    // Use parent callback if provided, otherwise use internal state
+    if (onSectionChange) {
+      onSectionChange(sectionId)
+    } else {
+      setActiveSectionState(sectionId)
+    }
+    
     // Use requestAnimationFrame to ensure DOM is ready before calculating
     requestAnimationFrame(() => {
       const element = document.getElementById(sectionId)
@@ -138,15 +187,12 @@ export default function Navbar() {
         const navbar = document.querySelector('nav')
         const navbarHeight = navbar ? navbar.offsetHeight : 80
         const elementTop = element.offsetTop
-        const offsetPosition = elementTop - navbarHeight - 40 // Increased padding to 40px
+        const offsetPosition = elementTop - navbarHeight - 40
         
         window.scrollTo({
           top: offsetPosition,
           behavior: 'smooth'
         })
-        
-        // Immediately update active section for better UX
-        setActiveSection(sectionId)
       }
     })
   }
