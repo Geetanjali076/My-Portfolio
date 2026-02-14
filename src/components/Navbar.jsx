@@ -2,178 +2,9 @@ import React, { useState, useEffect, useRef } from "react"
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
-  const isRestoringRef = useRef(false)
-  const modalOpenRef = useRef(false)
-  // Set initial active state based on URL hash or default to "home"
-  const getInitialSection = () => {
-    const hash = window.location.hash.replace('#', '')
-    // Validate that the hash corresponds to a valid section
-    const validSections = ['home', 'work', 'skills', 'about', 'contact']
-    return validSections.includes(hash) ? hash : "home"
-  }
-  const [activeSection, setActiveSection] = useState(getInitialSection())
+  const [activeSection, setActiveSection] = useState("home")
+  const isNavigating = useRef(false)
   
-  // Force update active section when URL hash changes
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '')
-      const validSections = ['home', 'work', 'skills', 'about', 'contact']
-      
-      if (validSections.includes(hash)) {
-        setActiveSection(hash)
-      }
-    }
-    
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange)
-    
-    // Also check on initial load
-    handleHashChange()
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange)
-    }
-  }, [])
-
-  useEffect(() => {
-    let scrollTimeout
-    
-    const handleScroll = () => {
-      // Don't update active section if modal is open or we're restoring
-      if (modalOpenRef.current || isRestoringRef.current) {
-        return
-      }
-      
-      // Debounce scroll events
-      clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        const sections = document.querySelectorAll('section[id]')
-        const navbar = document.querySelector('nav')
-        const navbarHeight = navbar ? navbar.offsetHeight : 80
-        const scrollPos = window.scrollY + navbarHeight + 40 // Match the same offset used in navigation
-
-        sections.forEach(section => {
-          const top = section.offsetTop
-          const height = section.offsetHeight
-          const id = section.getAttribute('id')
-
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(id)
-          }
-        })
-      }, 50) // 50ms debounce
-    }
-
-    // Listen for modal open/close events
-    const handleModalStateChange = (event) => {
-      const { isOpen } = event.detail
-      modalOpenRef.current = isOpen
-      
-      if (isOpen) {
-        // Modal is opening - save current section
-        const navbar = document.querySelector('nav')
-        const navbarHeight = navbar ? navbar.offsetHeight : 80
-        const scrollPos = window.scrollY + navbarHeight + 40
-        
-        const sections = document.querySelectorAll('section[id]')
-        let currentSection = 'work'
-        
-        sections.forEach(section => {
-          const top = section.offsetTop
-          const height = section.offsetHeight
-          const id = section.getAttribute('id')
-          
-          if (scrollPos >= top && scrollPos < top + height) {
-            currentSection = id
-          }
-        })
-        
-        // Store the current section AND force update active section immediately
-        document.body.setAttribute('data-modal-section', currentSection)
-        setActiveSection(currentSection) // Force update for mobile too
-      } else {
-        // Modal is closing - restore the section
-        const savedSection = document.body.getAttribute('data-modal-section')
-        if (savedSection) {
-          isRestoringRef.current = true
-          setActiveSection(savedSection) // Force update for mobile
-          
-          // Update URL hash to match the restored section
-          if (savedSection !== 'home') {
-            window.history.replaceState(null, null, `#${savedSection}`)
-          }
-          
-          setTimeout(() => {
-            isRestoringRef.current = false
-          }, 1000) // Longer delay to ensure no interference
-          
-          document.body.removeAttribute('data-modal-section')
-        }
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    window.addEventListener('modalStateChange', handleModalStateChange)
-    handleScroll()
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('modalStateChange', handleModalStateChange)
-      clearTimeout(scrollTimeout)
-    }
-  }, [])
-
-  // Handle hash navigation
-  useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    if (hash) {
-      const element = document.getElementById(hash)
-      if (element) {
-        // Get the navbar height to offset the scroll position
-        const navbar = document.querySelector('nav')
-        const navbarHeight = navbar ? navbar.offsetHeight : 80
-        const elementTop = element.offsetTop
-        const offsetPosition = elementTop - navbarHeight - 40 // Increased padding to 40px
-        
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          })
-          setActiveSection(hash)
-        }, 50)
-      }
-    }
-  }, [])
-
-  const handleNavClick = (sectionId) => {
-    setOpen(false)
-    
-    // Update URL hash
-    window.history.replaceState(null, null, `#${sectionId}`)
-    
-    // Use requestAnimationFrame to ensure DOM is ready before calculating
-    requestAnimationFrame(() => {
-      const element = document.getElementById(sectionId)
-      if (element) {
-        // Get the navbar height to offset the scroll position
-        const navbar = document.querySelector('nav')
-        const navbarHeight = navbar ? navbar.offsetHeight : 80
-        const elementTop = element.offsetTop
-        const offsetPosition = elementTop - navbarHeight - 40 // Increased padding to 40px
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        })
-        
-        // Immediately update active section for better UX
-        setActiveSection(sectionId)
-      }
-    })
-  }
-
   const navItems = [
     { id: "home", label: "Home" },
     { id: "work", label: "Projects" },
@@ -181,6 +12,194 @@ export default function Navbar() {
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" }
   ]
+
+  // Get current hash section
+  const getCurrentHashSection = () => {
+    const hash = window.location.hash.replace('#', '')
+    return navItems.find(item => item.id === hash) ? hash : "home"
+  }
+
+  // Smooth scroll to section
+  const scrollToSection = (sectionId, smooth = true) => {
+    const element = document.getElementById(sectionId)
+    if (!element) return
+
+    // Get navbar height with mobile consideration
+    const navbar = document.querySelector('nav')
+    let navbarHeight = 80 // Default
+    
+    if (navbar) {
+      // Check if we're in mobile view
+      const isMobile = window.innerWidth <= 767
+      if (isMobile) {
+        // Mobile navbar is positioned differently, use smaller offset
+        navbarHeight = 60
+      } else {
+        navbarHeight = navbar.offsetHeight
+      }
+    }
+    
+    // Get accurate element position
+    const elementTop = element.offsetTop
+    const offsetPosition = elementTop - navbarHeight - (window.innerWidth <= 767 ? 0 : 10)
+
+    // Force scroll with multiple methods
+    window.scrollTo({
+      top: offsetPosition,
+      left: 0,
+      behavior: smooth ? 'smooth' : 'auto'
+    })
+    
+    // Backup methods for mobile compatibility
+    setTimeout(() => {
+      document.documentElement.scrollTop = offsetPosition
+      document.body.scrollTop = offsetPosition
+    }, smooth ? 100 : 0)
+    
+    setActiveSection(sectionId)
+  }
+
+  // Handle direct navigation (URL hash changes)
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      if (isNavigating.current) return
+      
+      const targetSection = getCurrentHashSection()
+      isNavigating.current = true
+      
+      // Wait for DOM to be ready
+      setTimeout(() => {
+        const element = document.getElementById(targetSection)
+        if (element) {
+          // Get navbar height with mobile consideration
+          const navbar = document.querySelector('nav')
+          let navbarHeight = 80 // Default
+          
+          if (navbar) {
+            const isMobile = window.innerWidth <= 767
+            if (isMobile) {
+              navbarHeight = 60
+            } else {
+              navbarHeight = navbar.offsetHeight
+            }
+          }
+          
+          const elementTop = element.offsetTop
+          const offsetPosition = elementTop - navbarHeight - (window.innerWidth <= 767 ? 0 : 10)
+          
+          // Force scroll to exact position
+          window.scrollTo(0, offsetPosition)
+          document.documentElement.scrollTop = offsetPosition
+          document.body.scrollTop = offsetPosition
+          
+          setActiveSection(targetSection)
+          
+          // Double-check after animation
+          setTimeout(() => {
+            window.scrollTo(0, offsetPosition)
+            document.documentElement.scrollTop = offsetPosition
+            document.body.scrollTop = offsetPosition
+          }, 300)
+        }
+        isNavigating.current = false
+      }, 100)
+    }
+
+    // Initial load
+    handleHashNavigation()
+    
+    // Hash changes
+    window.addEventListener('hashchange', handleHashNavigation)
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashNavigation)
+    }
+  }, [])
+
+  // Handle scroll-based section detection (only when no hash)
+  useEffect(() => {
+    let scrollTimeout
+    
+    const handleScroll = () => {
+      // Skip if we have a hash (direct navigation) or we're navigating
+      if (window.location.hash || isNavigating.current) {
+        return
+      }
+      
+      clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => {
+        const sections = document.querySelectorAll('section[id]')
+        const navbar = document.querySelector('nav')
+        const navbarHeight = navbar ? navbar.offsetHeight : 80
+        const scrollPos = window.scrollY + navbarHeight + 10 // Reduced offset for mobile
+
+        for (const section of sections) {
+          const top = section.offsetTop
+          const height = section.offsetHeight
+          const id = section.getAttribute('id')
+
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(id)
+            break
+          }
+        }
+      }, 50)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearTimeout(scrollTimeout)
+    }
+  }, [])
+
+  // Handle navigation clicks
+  const handleNavClick = (sectionId) => {
+    setOpen(false)
+    isNavigating.current = true
+    
+    // Update URL
+    window.history.pushState(null, null, `#${sectionId}`)
+    
+    // Immediate scroll to section
+    const element = document.getElementById(sectionId)
+    if (element) {
+      // Get navbar height with mobile consideration
+      const navbar = document.querySelector('nav')
+      let navbarHeight = 80 // Default
+      
+      if (navbar) {
+        const isMobile = window.innerWidth <= 767
+        if (isMobile) {
+          navbarHeight = 60
+        } else {
+          navbarHeight = navbar.offsetHeight
+        }
+      }
+      
+      const elementTop = element.offsetTop
+      const offsetPosition = elementTop - navbarHeight - (window.innerWidth <= 767 ? 0 : 10)
+      
+      // Force immediate scroll
+      window.scrollTo(0, offsetPosition)
+      document.documentElement.scrollTop = offsetPosition
+      document.body.scrollTop = offsetPosition
+      
+      setActiveSection(sectionId)
+      
+      // Double-check after smooth animation
+      setTimeout(() => {
+        window.scrollTo(0, offsetPosition)
+        document.documentElement.scrollTop = offsetPosition
+        document.body.scrollTop = offsetPosition
+      }, 400)
+    }
+    
+    // Reset navigation flag
+    setTimeout(() => {
+      isNavigating.current = false
+    }, 800)
+  }
 
   return (
     <>
@@ -194,7 +213,10 @@ export default function Navbar() {
             <a
               key={item.id}
               href={`#${item.id}`}
-              onClick={() => handleNavClick(item.id)}
+              onClick={(e) => {
+                e.preventDefault()
+                handleNavClick(item.id)
+              }}
               className={activeSection === item.id ? "active" : ""}
             >
               {item.label}

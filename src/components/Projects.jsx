@@ -7,7 +7,10 @@ export default function Projects() {
   const [modalSlide, setModalSlide] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
   const [transitionEnabled, setTransitionEnabled] = useState(true)
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true)
+  const [modalType, setModalType] = useState('image') // 'image' or 'video'
   const autoPlayRef = useRef(null)
+  const modalVideoRef = useRef(null)
   
   // Calculate the correct transform based on current slide
   const getTransform = () => {
@@ -29,26 +32,31 @@ export default function Projects() {
   const pipelineImages = [
     {
       src: "/pipeline-home.png",
+      videoSrc: "/Working-Pipeline.mp4",
       title: "Pipeline Dashboard",
       description: "Main dashboard view with real-time metrics"
     },
     {
       src: "/bulk-pipeline-working.png", 
+      videoSrc: "/Working-Pipeline.mp4",
       title: "Bulk Processing",
       description: "Bulk purchase order processing interface"
     },
     {
       src: "/sales-overview.png",
+      videoSrc: "/Working-Pipeline.mp4",
       title: "Sales Analytics",
       description: "Comprehensive sales overview dashboard"
     },
     {
       src: "/monitoring-image.png?v=2",
+      videoSrc: "/Working-Pipeline.mp4",
       title: "System Monitoring",
       description: "Real-time system monitoring and alerts"
     },
     {
       src: "/customer-and-payment.png",
+      videoSrc: "/Working-Pipeline.mp4",
       title: "Customer & Payment",
       description: "Customer management and payment processing"
     }
@@ -71,16 +79,11 @@ export default function Projects() {
 
   // Prevent body scroll when modal is open
   useEffect(() => {
-    // Notify navbar of modal state change
-    window.dispatchEvent(new CustomEvent('modalStateChange', { 
-      detail: { isOpen: isModalOpen } 
-    }))
-    
     if (isModalOpen) {
       // Save current scroll position
       const savedScrollY = window.scrollY
       
-      // Store scroll position in multiple places for reliability
+      // Store scroll position
       document.body.setAttribute('data-scroll-y', savedScrollY.toString())
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
@@ -88,36 +91,37 @@ export default function Projects() {
       document.body.style.top = `-${savedScrollY}px`
     } else {
       // Restore scroll position
-      let scrollY = document.body.style.top
+      const scrollY = document.body.style.top
       const fallbackScroll = document.body.getAttribute('data-scroll-y')
       
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.width = ''
-      document.body.style.top = ''
-      
+      // Calculate target scroll position
       let targetScrollY = 0
       
       if (scrollY && scrollY !== '0px') {
         targetScrollY = parseInt(scrollY || '0') * -1
       } else if (fallbackScroll) {
         targetScrollY = parseInt(fallbackScroll)
-      } else {
-        // Force scroll to projects section as last resort
-        const workSection = document.getElementById('work')
-        if (workSection) {
-          const navbar = document.querySelector('nav')
-          const navbarHeight = navbar ? navbar.offsetHeight : 80
-          targetScrollY = workSection.offsetTop - navbarHeight - 40
-        }
       }
       
-      // Use multiple methods to ensure scroll happens
+      // Restore body styles first
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+      document.body.style.top = ''
+      
+      // Force scroll restoration with multiple methods
       setTimeout(() => {
         window.scrollTo(0, targetScrollY)
         document.documentElement.scrollTop = targetScrollY
         document.body.scrollTop = targetScrollY
-      }, 100)
+        
+        // Double-check scroll position
+        setTimeout(() => {
+          if (window.scrollY !== targetScrollY) {
+            window.scrollTo(0, targetScrollY)
+          }
+        }, 100)
+      }, 50)
       
       // Clean up
       document.body.removeAttribute('data-scroll-y')
@@ -129,7 +133,6 @@ export default function Projects() {
       document.body.style.position = ''
       document.body.style.width = ''
       document.body.style.top = ''
-      document.body.removeAttribute('data-modal-section')
       document.body.removeAttribute('data-scroll-y')
     }
   }, [isModalOpen])
@@ -179,16 +182,52 @@ export default function Projects() {
     }
   }
 
-  const openModal = (index) => {
+  const openModal = (index, type = 'image') => {
     setModalSlide(index)
+    setModalType(type)
     setIsModalOpen(true)
     setIsAutoPlay(false) // Stop auto-play when modal opens
+    setIsVideoPlaying(true) // Start video playing when modal opens
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
     setIsAutoPlay(true) // Resume auto-play when modal closes
+    setIsVideoPlaying(false) // Pause video when modal closes
   }
+
+  const toggleVideoPlay = () => {
+    if (modalVideoRef.current) {
+      if (isVideoPlaying) {
+        modalVideoRef.current.pause()
+      } else {
+        modalVideoRef.current.play()
+      }
+      setIsVideoPlaying(!isVideoPlaying)
+    }
+  }
+
+  // Handle ESC key for closing modal
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && isModalOpen) {
+        closeModal()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscKey)
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isModalOpen])
+
+  // Auto-play video when modal slide changes
+  useEffect(() => {
+    if (isModalOpen && modalVideoRef.current) {
+      modalVideoRef.current.play()
+      setIsVideoPlaying(true)
+    }
+  }, [modalSlide, isModalOpen])
 
   const modalNextSlide = () => {
     setModalSlide((prev) => (prev + 1) % pipelineImages.length)
@@ -244,7 +283,7 @@ export default function Projects() {
                           let originalIndex = index - 1
                           if (originalIndex < 0) originalIndex = pipelineImages.length - 1
                           else if (originalIndex >= pipelineImages.length) originalIndex = 0
-                          openModal(originalIndex)
+                          openModal(originalIndex, 'image')
                         }}
                       />
                       <div className="image-overlay">
@@ -294,6 +333,32 @@ export default function Projects() {
               ))}
             </div>
           </div>
+
+          {/* Video Preview Section */}
+          <div className="video-preview-section">
+            <h3 className="video-preview-title">🎬 Live Demo</h3>
+            <div className="video-preview-container">
+              <div className="video-preview-card">
+                <video
+                  className="video-preview-player"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  onClick={() => {
+                    let originalIndex = getCurrentDotIndex()
+                    openModal(originalIndex, 'video')
+                  }}
+                >
+                  <source src={pipelineImages[getCurrentDotIndex()].videoSrc} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <div className="video-overlay">
+                  <p>Click to view full demo</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -307,45 +372,87 @@ export default function Projects() {
               </svg>
             </button>
             
-            {/* Modal Title and Description at Top */}
-            <div className="modal-header">
-              <h3>{pipelineImages[modalSlide].title}</h3>
-              <p>{pipelineImages[modalSlide].description}</p>
-            </div>
-            
-            {/* Modal Image Below Title */}
-            <div className="modal-image-container">
-              <img 
-                src={pipelineImages[modalSlide].src}
-                alt={pipelineImages[modalSlide].title}
-                className="modal-image"
-              />
-            </div>
-            
-            {/* Modal Navigation */}
-            <button className="modal-arrow modal-arrow-left" onClick={modalPrevSlide}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            <button className="modal-arrow modal-arrow-right" onClick={modalNextSlide}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            {/* Modal Dots */}
-            <div className="modal-dots">
-              {pipelineImages.map((_, index) => (
-                <button
-                  key={index}
-                  className={`modal-dot ${index === modalSlide ? 'active' : ''}`}
-                  onClick={() => setModalSlide(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
+            {modalType === 'image' ? (
+              // Image Modal with full features
+              <>
+                {/* Modal Title and Description at Top */}
+                <div className="modal-header">
+                  <h3>{pipelineImages[modalSlide].title}</h3>
+                  <p>{pipelineImages[modalSlide].description}</p>
+                </div>
+                
+                {/* Modal Image Below Title */}
+                <div className="modal-image-container">
+                  <img 
+                    src={pipelineImages[modalSlide].src}
+                    alt={pipelineImages[modalSlide].title}
+                    className="modal-image"
+                  />
+                </div>
+                
+                {/* Modal Navigation */}
+                <button className="modal-arrow modal-arrow-left" onClick={modalPrevSlide}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                
+                <button className="modal-arrow modal-arrow-right" onClick={modalNextSlide}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                
+                {/* Modal Dots */}
+                <div className="modal-dots">
+                  {pipelineImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`modal-dot ${index === modalSlide ? 'active' : ''}`}
+                      onClick={() => setModalSlide(index)}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              // Video Modal - Clean
+              <>
+                {/* Modal Video Only */}
+                <div className="modal-video-container">
+                  <video
+                    ref={modalVideoRef}
+                    className="modal-video"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    onClick={toggleVideoPlay}
+                  >
+                    <source src={pipelineImages[modalSlide].videoSrc} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                  
+                  {/* Video Play/Pause Control */}
+                  <button 
+                    className="video-control-btn"
+                    onClick={toggleVideoPlay}
+                    aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+                  >
+                    {isVideoPlaying ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
+                        <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
+                      </svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 3l14 9-14 9V3z" fill="currentColor"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

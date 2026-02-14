@@ -5,7 +5,7 @@ export default function Home() {
     <section id="home">
       <div className="inner text-center">
         <div className="avatar">
-          <img src="/image.png" alt="Profile" />
+          <img src="/my-image.jpeg" alt="Profile" />
         </div>
         <h1>Hello, I’m Geetanjali Kushwaha</h1>
         <p>
