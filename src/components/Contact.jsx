@@ -13,7 +13,7 @@ export default function Contact() {
           <a href="https://www.linkedin.com/in/geetanjali-kushwaha-b06a76290/" target="_blank" rel="noreferrer">
             <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png" alt="LinkedIn" />
           </a>
-          <a href="https://github.com/Geetanjali076/purchase-order-pipeline" target="_blank" rel="noreferrer">
+          <a href="https://github.com/Geetanjali076" target="_blank" rel="noreferrer">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub" />
           </a>
         </div>

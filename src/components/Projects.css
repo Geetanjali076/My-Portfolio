@@ -1,3 +1,240 @@
+/* Project Tags */
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.tag {
+  background: rgba(175, 105, 253, 0.1);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tag:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Project Buttons */
+.project-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.project-buttons .btn-outline {
+  background: rgba(175, 105, 253, 0.3) !important;
+  color: white !important;
+  border: 2px solid var(--accent) !important;
+  padding: 0.3rem 0.8rem !important;
+  border-radius: 20px !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 12px rgba(175, 105, 253, 0.4) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  font-size: 0.85rem !important;
+}
+
+.project-buttons .btn-outline:hover {
+  background: var(--accent) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(175, 105, 253, 0.5) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Project Highlights */
+.project-highlights {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(175, 105, 253, 0.2);
+}
+
+.highlights-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, var(--accent), #d18fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-align: center;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.highlight-card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid rgba(175, 105, 253, 0.1);
+  transition: all 0.3s ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(175, 105, 253, 0.2);
+  border-color: rgba(175, 105, 253, 0.3);
+}
+
+.highlight-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.highlight-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.highlight-card p {
+  font-size: 0.9rem;
+  color: var(--text);
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Experience Section */
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.experience-card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgba(175, 105, 253, 0.1);
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.experience-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(175, 105, 253, 0.2);
+  border-color: rgba(175, 105, 253, 0.3);
+}
+
+.experience-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(175, 105, 253, 0.2);
+}
+
+.experience-header h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, var(--accent), #d18fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.company {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+.duration {
+  font-size: 0.9rem;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.experience-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.point-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  line-height: 1.5;
+}
+
+.point-bullet {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.point-item span:last-child {
+  color: var(--text);
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+/* Responsive Experience */
+@media (max-width: 768px) {
+  .experience-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .experience-card {
+    padding: 1.5rem;
+  }
+  
+  .experience-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .company {
+    font-size: 1rem;
+  }
+  
+  .duration {
+    font-size: 0.85rem;
+  }
+  
+  .point-bullet {
+    font-size: 1rem;
+  }
+  
+  .point-item span:last-child {
+    font-size: 0.9rem;
+  }
+}
+
 /* Project Showcase Styles */
 .project-showcase {
   margin-bottom: 2rem;
@@ -582,6 +819,48 @@ left: 20px;
     bottom: 15px;
     right: 15px;
   }
+  
+  .project-tags {
+    gap: 0.3rem;
+    margin: 1rem 0;
+  }
+  
+  .tag {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .project-buttons {
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+  }
+  
+  .btn-outline {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .highlights-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .highlight-card {
+    padding: 1rem;
+  }
+  
+  .highlight-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .highlight-card h4 {
+    font-size: 1rem;
+  }
+  
+  .highlight-card p {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -645,5 +924,47 @@ left: 20px;
     height: 40px;
     bottom: 10px;
     right: 10px;
+  }
+  
+  .project-tags {
+    gap: 0.2rem;
+    margin: 0.8rem 0;
+  }
+  
+  .tag {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .project-buttons {
+    gap: 0.6rem;
+    margin: 1rem 0;
+  }
+  
+  .btn-outline {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .highlights-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  
+  .highlight-card {
+    padding: 0.8rem;
+  }
+  
+  .highlight-icon {
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .highlight-card h4 {
+    font-size: 0.95rem;
+  }
+  
+  .highlight-card p {
+    font-size: 0.8rem;
   }
 }

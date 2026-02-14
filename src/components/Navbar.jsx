@@ -8,6 +8,7 @@ export default function Navbar() {
   const navItems = [
     { id: "home", label: "Home" },
     { id: "work", label: "Projects" },
+    { id: "experience", label: "Experience" },
     { id: "skills", label: "Skills" },
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" }
@@ -116,13 +117,13 @@ export default function Navbar() {
     }
   }, [])
 
-  // Handle scroll-based section detection (only when no hash)
+  // Handle scroll-based section detection
   useEffect(() => {
     let scrollTimeout
     
     const handleScroll = () => {
-      // Skip if we have a hash (direct navigation) or we're navigating
-      if (window.location.hash || isNavigating.current) {
+      // Skip if we're currently navigating
+      if (isNavigating.current) {
         return
       }
       
@@ -140,6 +141,11 @@ export default function Navbar() {
 
           if (scrollPos >= top && scrollPos < top + height) {
             setActiveSection(id)
+            
+            // Update URL hash to match current section
+            if (window.location.hash !== `#${id}`) {
+              window.history.replaceState(null, null, `#${id}`)
+            }
             break
           }
         }
