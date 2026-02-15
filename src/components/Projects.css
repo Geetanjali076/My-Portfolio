@@ -800,6 +800,11 @@ left: 20px;
     margin-bottom: 3rem;
   }
   
+  /* Add gap between Projects and Experience sections */
+  #work {
+    margin-bottom: 2rem;
+  }
+  
   .project-highlights {
     margin-top: 2rem;
     padding-top: 1.5rem;
