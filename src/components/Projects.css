@@ -796,6 +796,37 @@ left: 20px;
     right: 10px;
   }
   
+  .project-showcase {
+    margin-bottom: 3rem;
+  }
+  
+  .project-highlights {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+  
+  .highlights-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .highlight-card {
+    padding: 1rem;
+  }
+  
+  .highlight-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .highlight-card h4 {
+    font-size: 1rem;
+  }
+  
+  .highlight-card p {
+    font-size: 0.8rem;
+  }
+  
   .modal-content {
     max-width: 95vw;
     max-height: 90vh;
